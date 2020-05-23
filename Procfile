@@ -1,0 +1,1 @@
+web: cd news_board/; python manage.py migrate --noinput; gunicorn news_board.wsgi
