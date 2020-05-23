@@ -13,9 +13,31 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework import routers
+from rest_framework_extensions.routers import NestedRouterMixin
+
+from api.views import CommentViewSet, PostUpvoteView, PostViewSet
+
+
+class NestedDefaultRouter(NestedRouterMixin, routers.DefaultRouter):
+    """Mixin class for nested routing"""
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("api/posts/<int:post_id>/upvote/", PostUpvoteView.as_view()),
+]
+
+router = NestedDefaultRouter()
+
+authors_router = router.register("api/posts", PostViewSet)
+authors_router.register(
+    "comments",
+    CommentViewSet,
+    basename="posts-comments",
+    parents_query_lookups=["post"],
+)
+
+urlpatterns += [
+    path("", include(router.urls)),
 ]
